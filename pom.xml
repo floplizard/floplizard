@@ -36,8 +36,7 @@
         <project.jdk7.home>${env.JAVA7_HOME}</project.jdk7.home>
         <project.build.targetJdk>1.7</project.build.targetJdk>
 
-        <dep.basepom-policy.version>3</dep.basepom-policy.version>
-        <dep.kitei-rules.version>4</dep.kitei-rules.version>
+        <dep.kitei-rules.version>5</dep.kitei-rules.version>
 
         <!-- dropwizard dep use 2.3.x -->
         <dep.jackson.version>2.3.3</dep.jackson.version>
@@ -123,15 +122,6 @@
     <build>
         <pluginManagement>
             <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-enforcer-plugin</artifactId>
-                    <configuration>
-                        <rules combine.children="append">
-                            <DependencyConvergence/>
-                        </rules>
-                    </configuration>
-                </plugin>
                 <!-- Load the pmd rules from the kitei-rules jar -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -147,31 +137,6 @@
                         <rulesets>
                             <ruleset>pmd/kitei.xml</ruleset>
                         </rulesets>
-                    </configuration>
-                </plugin>
-
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-checkstyle-plugin</artifactId>
-                    <configuration>
-                        <configLocation>checkstyle/checkstyle-basepom.xml</configLocation>
-                    </configuration>
-                </plugin>
-
-
-                <plugin>
-                    <groupId>com.mycila</groupId>
-                    <artifactId>license-maven-plugin</artifactId>
-                    <dependencies>
-                        <dependency>
-                            <groupId>org.basepom</groupId>
-                            <artifactId>basepom-policy</artifactId>
-                            <version>${dep.basepom-policy.version}</version>
-                        </dependency>
-                    </dependencies>
-                    <!-- license header from the rules jar -->
-                    <configuration>
-                        <header>license/basepom-apache-license-header.txt</header>
                     </configuration>
                 </plugin>
             </plugins>
