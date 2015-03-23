@@ -55,6 +55,14 @@
         <module>floplizard-guice</module>
     </modules>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.floplizard</groupId>
+            <artifactId>floplizard-guice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
     <dependencyManagement>
         <dependencies>
             <dependency>

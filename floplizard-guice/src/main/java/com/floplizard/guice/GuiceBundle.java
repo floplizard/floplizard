@@ -29,7 +29,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.inject.Binder;
 import com.google.inject.Binding;
 import com.google.inject.Guice;
-import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Key;
 import com.google.inject.Module;
@@ -73,29 +72,15 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
     private final Class<T> configClass;
     private final ImmutableSet<Module> guiceModules;
     private final Stage guiceStage;
+    private final boolean enforcerEnabled;
 
-    private final Function<ResourceConfig, ServletContainer> replacer = new Function<ResourceConfig, ServletContainer>() {
-        private GuiceContainer container = null;
-
-        @Inject
-        void setContainer(final GuiceContainer container)
-        {
-            this.container = checkNotNull(container, "container is null");
-        }
-
-        @Override
-        public ServletContainer apply(@Nonnull final ResourceConfig resourceConfig)
-        {
-            return checkNotNull(container, "container is null");
-        }
-    };
-
-    private GuiceBundle(final Class<T> configClass, final ImmutableSet<Module> guiceModules, final Stage guiceStage)
+    private GuiceBundle(final Class<T> configClass, final ImmutableSet<Module> guiceModules, final Stage guiceStage, final boolean enforcerEnabled)
     {
         this.configClass = configClass;
 
         this.guiceModules = guiceModules;
         this.guiceStage = guiceStage;
+        this.enforcerEnabled = enforcerEnabled;
     }
 
     @Override
@@ -116,25 +101,26 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
         final DropwizardGuiceModule dropwizardGuiceModule = new DropwizardGuiceModule();
 
-        final Injector injector =
-            Guice.createInjector(guiceStage,
-                ImmutableSet.<Module>builder()
-                    .addAll(guiceModules)
-                    .add(new GuiceEnforcerModule())
-                    .add(new JerseyServletModule())
-                    .add(dropwizardGuiceModule)
-                    .add(new Module() {
-                        @Override
-                        public void configure(final Binder binder)
-                        {
-                            binder.bind(Environment.class).toInstance(environment);
-                            binder.bind(configClass).toInstance(configuration);
+        ImmutableSet.Builder<Module> moduleBuilder = ImmutableSet.builder();
+        moduleBuilder.addAll(guiceModules);
+        moduleBuilder.add(new JerseyServletModule());
+        moduleBuilder.add(dropwizardGuiceModule);
+        moduleBuilder.add(new Module() {
+            @Override
+            public void configure(final Binder binder)
+            {
+                binder.bind(Environment.class).toInstance(environment);
+                binder.bind(configClass).toInstance(configuration);
 
-                            binder.bind(GuiceContainer.class).to(DropwizardGuiceContainer.class).in(Scopes.SINGLETON);
+                binder.bind(GuiceContainer.class).to(DropwizardGuiceContainer.class).in(Scopes.SINGLETON);
+            }
+        });
 
-                            binder.requestInjection(replacer);
-                        }
-                    }).build());
+        if (enforcerEnabled) {
+            moduleBuilder.add(new GuiceEnforcerModule());
+        }
+
+        final Injector injector = Guice.createInjector(guiceStage, moduleBuilder.build());
 
         for (Managed managed : dropwizardGuiceModule.getManaged()) {
             LOG.info("Added guice injected managed Object: {}", managed.getClass().getName());
@@ -153,13 +139,14 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
 
         for (ServerLifecycleListener serverLifecycleListener : dropwizardGuiceModule.getServerLifecycleListeners()) {
             environment.lifecycle().addServerLifecycleListener(serverLifecycleListener);
+            LOG.info("Added guice server lifecycle listener: {}", serverLifecycleListener.getClass().getName());
         }
 
         addJerseyBindings(environment, injector, ResourceConfig.PROPERTY_CONTAINER_REQUEST_FILTERS, ContainerRequestFilter.class);
         addJerseyBindings(environment, injector, ResourceConfig.PROPERTY_CONTAINER_RESPONSE_FILTERS, ContainerResponseFilter.class);
         addJerseyBindings(environment, injector, ResourceConfig.PROPERTY_RESOURCE_FILTER_FACTORIES, ResourceFilterFactory.class);
 
-        environment.jersey().replace(replacer);
+        environment.jersey().replace(getReplacerFunction(injector.getInstance(GuiceContainer.class)));
         environment.servlets().addFilter("Guice Filter", GuiceFilter.class).addMappingForUrlPatterns(null, false, environment.getApplicationContext().getContextPath() + "*");
     }
 
@@ -177,11 +164,24 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         }
     }
 
+    private static Function<ResourceConfig, ServletContainer> getReplacerFunction(final GuiceContainer container)
+    {
+        checkNotNull(container, "container is null");
+        return new Function<ResourceConfig, ServletContainer>() {
+            @Override
+            public ServletContainer apply(@Nonnull final ResourceConfig resourceConfig)
+            {
+                return container;
+            }
+        };
+    }
+
     public static final class Builder<U extends Configuration>
     {
         private final Class<U> configClass;
         private final ImmutableSet.Builder<Module> guiceModules = ImmutableSet.builder();
         private Stage guiceStage = Stage.PRODUCTION;
+        private boolean enforcerEnabled = true;
 
         private Builder(final Class<U> configClass)
         {
@@ -195,9 +195,17 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
         {
             checkNotNull(guiceStage, "guiceStage is null");
             if (guiceStage != Stage.PRODUCTION) {
-                LOG.warn("Guice should only ever run in PRODUCTION mode except for testing!");
+                LOG.warn("*** Guice stage was set to {}. Guice should only ever run in PRODUCTION mode except for testing!", guiceStage);
             }
             this.guiceStage = guiceStage;
+            return this;
+        }
+
+        public Builder<U> disableEnforcer()
+        {
+            enforcerEnabled = false;
+            LOG.warn("*** The Guice enforcement module was disabled. This can lead to problems with dependency injection and application stability!");
+
             return this;
         }
 
@@ -224,7 +232,7 @@ public class GuiceBundle<T extends Configuration> implements ConfiguredBundle<T>
          */
         public GuiceBundle<U> build()
         {
-            return new GuiceBundle<U>(configClass, guiceModules.build(), guiceStage);
+            return new GuiceBundle<U>(configClass, guiceModules.build(), guiceStage, enforcerEnabled);
         }
     }
 }
