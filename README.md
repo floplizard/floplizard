@@ -2,9 +2,11 @@
 
 Extensions for the Dropwizard 0.7.x Framework.
 
-## floplizard-guice - _"The missing Guice support for Dropwizard"_
+### floplizard-guice - _"The missing Guice support for Dropwizard"_
 
-### Why not (yet?) Dropwizard 0.8.x?
+[Documentation and Examples](https://github.com/floplizard/floplizard/wiki/floplizard-guice)
+
+#### Why not (yet?) Dropwizard 0.8.x?
 
 Dropwizard 0.8.x chose to switch to Jersey 2 which is notoriously
 difficult to use with any dependency injection framework besides the
