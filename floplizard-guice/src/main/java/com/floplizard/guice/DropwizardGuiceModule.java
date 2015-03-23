@@ -13,10 +13,6 @@
  */
 package com.floplizard.guice;
 
-import io.dropwizard.lifecycle.Managed;
-import io.dropwizard.lifecycle.ServerLifecycleListener;
-import io.dropwizard.servlets.tasks.Task;
-
 import java.util.Set;
 
 import com.codahale.metrics.health.HealthCheck;
@@ -28,6 +24,10 @@ import com.google.inject.matcher.Matchers;
 import com.google.inject.spi.InjectionListener;
 import com.google.inject.spi.TypeEncounter;
 import com.google.inject.spi.TypeListener;
+
+import io.dropwizard.lifecycle.Managed;
+import io.dropwizard.lifecycle.ServerLifecycleListener;
+import io.dropwizard.servlets.tasks.Task;
 
 class DropwizardGuiceModule implements Module
 {

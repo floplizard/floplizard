@@ -15,11 +15,11 @@ package com.floplizard.guice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import io.dropwizard.setup.Environment;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.inject.Inject;
 import com.google.inject.Provider;
+
+import io.dropwizard.setup.Environment;
 
 /**
  * Expose the Dropwizard Object mapper into Guice. To use this, add a

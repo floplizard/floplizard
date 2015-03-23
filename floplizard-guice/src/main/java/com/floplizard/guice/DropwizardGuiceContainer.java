@@ -15,8 +15,6 @@ package com.floplizard.guice;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import io.dropwizard.setup.Environment;
-
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -26,6 +24,8 @@ import com.google.inject.Injector;
 import com.sun.jersey.api.core.ResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 import com.sun.jersey.spi.container.servlet.WebConfig;
+
+import io.dropwizard.setup.Environment;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 

@@ -13,10 +13,10 @@
  */
 package com.floplizard.guice;
 
-import io.dropwizard.setup.Environment;
-
 import com.google.inject.Binder;
 import com.google.inject.name.Names;
+
+import io.dropwizard.setup.Environment;
 
 public class LittleGuiceAppModule extends DropwizardAwareModule<LittleGuiceAppConfiguration>
 {

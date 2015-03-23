@@ -18,10 +18,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
-import io.dropwizard.testing.junit.DropwizardAppRule;
-
 import org.junit.ClassRule;
 import org.junit.Test;
+
+import io.dropwizard.testing.junit.DropwizardAppRule;
 
 public class TestDropwizardApp
 {

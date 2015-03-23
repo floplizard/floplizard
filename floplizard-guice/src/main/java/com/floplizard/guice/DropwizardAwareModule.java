@@ -16,10 +16,10 @@ package com.floplizard.guice;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import io.dropwizard.setup.Environment;
-
 import com.google.inject.Binder;
 import com.google.inject.Module;
+
+import io.dropwizard.setup.Environment;
 
 /**
  * A Guice module that need access to the dropwizard configuration object or the {@link Environment} at

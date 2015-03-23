@@ -13,9 +13,9 @@
  */
 package com.floplizard.guice;
 
-import io.dropwizard.Configuration;
-
 import javax.validation.constraints.NotNull;
+
+import io.dropwizard.Configuration;
 
 public class LittleGuiceAppConfiguration extends Configuration
 {
