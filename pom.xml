@@ -18,7 +18,7 @@
     <parent>
         <groupId>org.basepom</groupId>
         <artifactId>basepom-standard-oss</artifactId>
-        <version>11-SNAPSHOT</version>
+        <version>11</version>
     </parent>
 
     <groupId>com.floplizard</groupId>
@@ -115,6 +115,12 @@
                 <groupId>io.dropwizard</groupId>
                 <artifactId>dropwizard-testing</artifactId>
                 <version>${dep.dropwizard.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>jsr311-api</artifactId>
+                <version>1.1.1</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
